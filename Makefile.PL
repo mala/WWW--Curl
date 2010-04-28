@@ -9,7 +9,7 @@ author			'Cris Bailiff <c.bailiff+curl at devsecure.com>';
 license			'MPL or MIT/X-derivate';
 perl_version		'5.006001';
 no_index		directory => 'template';
-repository		'http://github.com/szbalint/WWW--Curl';
+repository 'http://github.com/szbalint/WWW--Curl';
 # This is a hack. If you have libcurl installed, just specify curl.h below
 # and comment out this line.
 if ($^O ne 'MSWin32') {
@@ -100,20 +100,27 @@ if (!defined($curl_h)) {
     print "Found curl.h in $curl_h\n";
     open(CURL_H, "<" . $curl_h) or die "Can't open curl.h\n";
     my %constants;
+
     while (<CURL_H>) {
-        if ($_ =~ m/CINIT\(/ and $_ !~ m/#/) {
-            my ($option, $type, $code) =
-                m/.*CINIT\((\w*)\s*,\s*(\w+)\s*,\s*(\d+).*/;
-	    $constants{CURLOPT_}->{$option} = $option;
-	} elsif ($_ =~ m/^#define CURLOPT_\w+\s+CURLOPT_\w+/) {
-            my ($option, $value) =
-                m/^#define CURLOPT_(\w+)\s+CURLOPT_(\w+)/;
-	    $constants{CURLOPT_}->{$option} = $value;
-        } elsif ($_ =~ m/^\s*(CURLINFO_|CURLSHOPT_|CURL_LOCK_DATA_|CURLE_|CURL_NETRC_)(\w+)/) {
-	    $constants{$1}->{$2} = $2;
+        if ( $_ =~ m/CINIT\(/ and $_ !~ m/#/ ) {
+            my ( $option, $type, $code ) =
+              m/.*CINIT\((\w*)\s*,\s*(\w+)\s*,\s*(\d+).*/;
+            $constants{CURLOPT_}->{$option} = $option;
+        }
+        elsif ( $_ =~ m/^#define CURLOPT_\w+\s+CURLOPT_\w+/ ) {
+            my ( $option, $value ) = m/^#define CURLOPT_(\w+)\s+CURLOPT_(\w+)/;
+            $constants{CURLOPT_}->{$option} = $value;
+        }
+        elsif ( $_ =~ m/^#define (CURL[^_]+?_)(\w+)/) {
+            $constants{$1}->{$2} = $2;
+        }
+        elsif ( $_ =~m/^\s*(CURLINFO_|CURLSHOPT_|CURL_LOCK_DATA_|CURLE_|CURL_NETRC_|CURL[^_]+?_)(\w+)/) {
+            $constants{$1}->{$2} = $2;
         }
 
     }
+
+
     close(CURL_H);
 
     # some things are ifdefed out...
